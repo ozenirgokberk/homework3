@@ -8,14 +8,15 @@ def generate_dataset_by_dimension_cnt(n):
     y = []
     t = []
     a = []
-    for j in range(1, (n**2)+2, 1):
-        if len(X) == n:
+    for j in range(1, ((n[1] + 1)*n[0]), 1):
+        if len(X) == n[0]:
             t.append(X)
             X=[]
-        exec('var_%d = j+np.random.rand()*j' % j)
+        exec('var_%d = j+np.random.rand()' % j)
         exec('X=X.append(var_%d)' % j)
-    for i in range(n):
+    for i in range(len(t)):
         y.append([i + np.random.rand() + i])
+    for i in range(n[0]):
         a.append(0)
     coef = np.array(a)
     return np.array(t), np.array(y), coef
@@ -36,7 +37,7 @@ def mean_square_error(coef, x, y):
     return np.mean((np.dot(x, coef) - y) ** 2) / 2
 
 def gradients(coef, x, y):
-    return np.mean(x.transpose() * (np.dot(x, coef) - y), axis=1)
+    return np.mean(np.mat(x.transpose()) * np.mat((np.dot(x, coef) - y)))
 
 def multilinear_regression(coef, x, y, lr, b1=0.9, b2=0.999, epsilon=1e-8):
     prev_error = 0
@@ -57,7 +58,7 @@ def multilinear_regression(coef, x, y, lr, b1=0.9, b2=0.999, epsilon=1e-8):
             print(e)
         t += 1
         m_coef = b1 * m_coef + (1 - b1) * grad
-        v_coef = b2 * v_coef + (1 - b2) * grad ** 2
+        v_coef = b2 * v_coef + (1 - b2) * (grad ** 2)
         moment_m_coef = m_coef / (1 - b1 ** t)
         moment_v_coef = v_coef / (1 - b2 ** t)
 
@@ -68,7 +69,7 @@ def multilinear_regression(coef, x, y, lr, b1=0.9, b2=0.999, epsilon=1e-8):
     return coef
 
 
-n = 10
+n = [3,500]
 x, y, coef = generate_dataset_by_dimension_cnt(n)
 
 #x,y = generate_dataset(3)
@@ -89,11 +90,12 @@ fig = plt.figure()
 ax = Axes3D(fig)
 
 ax.scatter(x[:, 1], x[:, 2], y, label='y',
-           s=5, color="dodgerblue")
+           s=n, color="dodgerblue")
 
 ax.scatter(x[:, 1], x[:, 2], c[0] + c[1] * x[:, 1] + c[2] * x[:, 2],
-           label='regression', s=5, color="orange")
+           label='regression', s=n, color="orange")
 
 ax.view_init(45, 0)
 ax.legend()
 plt.show()
+print(c)
