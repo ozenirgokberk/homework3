@@ -3,6 +3,22 @@ import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
+def generate_dataset_by_dimension_cnt(n):
+    X = []
+    y = []
+    t = []
+    a = []
+    for j in range(1, (n**2)+2, 1):
+        if len(X) == n:
+            t.append(X)
+            X=[]
+        exec('var_%d = j+np.random.rand()*j' % j)
+        exec('X=X.append(var_%d)' % j)
+    for i in range(n):
+        y.append([i + np.random.rand() + i])
+        a.append(0)
+    coef = np.array(a)
+    return np.array(t), np.array(y), coef
 
 def generate_dataset(n):
     X = []
@@ -16,27 +32,11 @@ def generate_dataset(n):
         y.append([random_x1 * x1 + random_x2 * x2 + 1])
     return np.array(X), np.array(y)
 
-n = 3 #
-x, y = generate_dataset(n)
-
-mpl.rcParams['legend.fontsize'] = 16
-
-fig = plt.figure()
-ax = Axes3D(fig)
-
-ax.scatter(x[:, 1], x[:, 2], y, label='y', s=5)
-ax.legend()
-ax.view_init(45, 0)
-plt.show()
-
-
-def mse(coef, x, y):
+def mean_square_error(coef, x, y):
     return np.mean((np.dot(x, coef) - y) ** 2) / 2
-
 
 def gradients(coef, x, y):
     return np.mean(x.transpose() * (np.dot(x, coef) - y), axis=1)
-
 
 def multilinear_regression(coef, x, y, lr, b1=0.9, b2=0.999, epsilon=1e-8):
     prev_error = 0
@@ -47,7 +47,7 @@ def multilinear_regression(coef, x, y, lr, b1=0.9, b2=0.999, epsilon=1e-8):
     t = 0
 
     while True:
-        error = mse(coef, x, y)
+        error = mean_square_error(coef, x, y)
         if abs(error - prev_error) <= epsilon:
             break
         prev_error = error
@@ -68,7 +68,22 @@ def multilinear_regression(coef, x, y, lr, b1=0.9, b2=0.999, epsilon=1e-8):
     return coef
 
 
-coef = np.array([0, 0, 0])
+n = 10
+x, y, coef = generate_dataset_by_dimension_cnt(n)
+
+#x,y = generate_dataset(3)
+#coef = np.array([0, 0, 0])
+mpl.rcParams['legend.fontsize'] = 16
+
+fig = plt.figure()
+ax = Axes3D(fig)
+
+ax.scatter(x[:, 1], x[:, 2], y, label='y', s=n)
+ax.legend()
+ax.view_init(45, 0)
+plt.show()
+
+
 c = multilinear_regression(coef, x, y, 1e-1)
 fig = plt.figure()
 ax = Axes3D(fig)
